@@ -1,16 +1,19 @@
 package main
 
 import (
-	"crypto/ecdsa" //main cryptographic functions
+	"crypto/ecdsa"    //main cryptographic functions
 	"crypto/elliptic" //used to get the elliptic curve
 	"crypto/rand"     //Package rand implements a cryptographically secure pseudorandom number generator.
-	"crypto/sha256" //used for the sha256 hash and digest
-	"crypto/x509" //used for key parsing and mashalling
+	"crypto/sha256"   //used for the sha256 hash and digest
+	"crypto/x509"     //used for key parsing and mashalling
 	"encoding/base64" //used to convert signature to base64
-	"encoding/pem" //used to create the PEM format string
-	"fmt" //console output
-	"math/big" //used to store very large numbers (bytes in this case)
-	"os" //operating system interaction
+	"encoding/json"   // used to create the Json object output
+	"encoding/pem"    //used to create the PEM format string
+	"fmt"             //console output
+	"math/big"        //used to store very large numbers (bytes in this case)
+	"os"              //operating system interaction
+
+	"bytes"
 )
 
 /*
@@ -34,8 +37,15 @@ Include Unit Test(s) with instructions on how a Continuous Integration system ca
 
 func main() {
 
+	//the structure that will be converted to Json (with lowercase keys)
+	type EcdsaDataGroup struct {
+		Message   string `json:"message"`
+		Signature string `json:"signature"`
+		Pubkey    string `json:"pubkey"`
+	}
+
 	//if not two arguments print correct usage and exit
-	if len(os.Args) != 2{
+	if len(os.Args) != 2 {
 		fmt.Printf("Usage: %s (input string)\n", os.Args[0])
 		os.Exit(1)
 	}
@@ -58,11 +68,11 @@ func main() {
 	//
 	// publicKey := privateKey.PublicKey
 	/*
-	fmt.Println("Private key: ")
-	fmt.Printf("%x \n", privateKey)
+		fmt.Println("Private key: ")
+		fmt.Printf("%x \n", privateKey)
 
-	fmt.Println("Public key: ")
-	fmt.Printf("%x \n", publicKey)
+		fmt.Println("Public key: ")
+		fmt.Printf("%x \n", publicKey)
 	*/
 	//TODO: write these keys to filesystem
 	/*
@@ -90,14 +100,15 @@ func main() {
 	signature := signaturePart1.Bytes()
 	signature = append(signature, signaturePart2.Bytes()...)
 
-	fmt.Printf("Signature: %s\n", base64.StdEncoding.EncodeToString(signature))
+	signatureBase64 := base64.StdEncoding.EncodeToString(signature)
+	//fmt.Printf("Signature: %s\n", signatureBase64)
 
 	//verify
 	//verifystatus := ecdsa.Verify(&publicKey, myHash[:], signaturePart1, signaturePart2)
 	//fmt.Println(verifystatus)
 
 	//MarshalECPrivateKey marshals an EC private key into ASN.1, DER format.
-	asn_der, err := x509.MarshalECPrivateKey(privateKey)
+	asnDer, err := x509.MarshalECPrivateKey(privateKey)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -105,8 +116,28 @@ func main() {
 
 	var pp = &pem.Block{
 		Type:  "PUBLIC KEY",
-		Bytes: asn_der, // The decoded bytes of the contents. Typically a DER encoded ASN.1 structure.
+		Bytes: asnDer, // The decoded bytes of the contents. Typically a DER encoded ASN.1 structure.
 	}
 
-	fmt.Printf("%s \n", pem.EncodeToMemory(pp))
+	//fmt.Printf("%s \n", pem.EncodeToMemory(pp))
+
+	//create a type of struct EcdsaDataGroup and initialize it
+	ecdsaData := EcdsaDataGroup{
+		Message:   os.Args[1],
+		Signature: signatureBase64,
+		Pubkey:    string(pem.EncodeToMemory(pp)[:]),
+	}
+
+	//convert struct to slice of bytes w/Json data
+	jsonEcdsaData, err := json.Marshal(ecdsaData)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// This calls the Indent function which nicely formats the output
+	var prettyOut bytes.Buffer
+	json.Indent(&prettyOut, jsonEcdsaData, "", "\t")
+	prettyOut.WriteTo(os.Stdout)
+
 }
