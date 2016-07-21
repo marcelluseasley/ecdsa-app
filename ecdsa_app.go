@@ -34,6 +34,12 @@ Include Unit Test(s) with instructions on how a Continuous Integration system ca
 
 func main() {
 
+	//if not two arguments print correct usage and exit
+	if len(os.Args) != 2{
+		fmt.Printf("Usage: %s (input string)\n", os.Args[0])
+		os.Exit(1)
+	}
+
 	//PrivateKey represents a ECDSA private key.
 	privateKey := new(ecdsa.PrivateKey)
 
@@ -48,14 +54,16 @@ func main() {
 	}
 
 	//the privatekey struct contains an instance of the public key associated with itself (the private key)
-	publicKey := privateKey.PublicKey
-
+	//
+	//
+	// publicKey := privateKey.PublicKey
+	/*
 	fmt.Println("Private key: ")
 	fmt.Printf("%x \n", privateKey)
 
 	fmt.Println("Public key: ")
 	fmt.Printf("%x \n", publicKey)
-
+	*/
 	//TODO: write these keys to filesystem
 	/*
 
@@ -65,7 +73,7 @@ func main() {
 
 	//myHash is the digest returned by the sha256 hash function
 	//Sum256 returns the SHA256 checksum of the data.
-	myHash := sha256.Sum256([]byte("theAnswerIs42"))
+	myHash := sha256.Sum256([]byte(os.Args[1]))
 
 	//needed by the ecdsa.Sign function which returns the sig in two different variables
 	signaturePart1 := big.NewInt(0)
