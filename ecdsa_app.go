@@ -1,16 +1,16 @@
 package main
 
 import (
-	"crypto/ecdsa"
+	"crypto/ecdsa" //main cryptographic functions
 	"crypto/elliptic" //used to get the elliptic curve
 	"crypto/rand"     //Package rand implements a cryptographically secure pseudorandom number generator.
-	"crypto/sha256"
-	"crypto/x509"
-	"encoding/base64"
-	"encoding/pem"
-	"fmt"
-	"math/big"
-	"os"
+	"crypto/sha256" //used for the sha256 hash and digest
+	"crypto/x509" //used for key parsing and mashalling
+	"encoding/base64" //used to convert signature to base64
+	"encoding/pem" //used to create the PEM format string
+	"fmt" //console output
+	"math/big" //used to store very large numbers (bytes in this case)
+	"os" //operating system interaction
 )
 
 /*
